@@ -31,6 +31,7 @@ jobs:
         id: version
         run: |
           VERSION=$(cat build.txt | tr -d ' \n')
+          echo "version=$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: build docker image
