@@ -11,6 +11,7 @@ jobs:
 
     permissions:
       contents: write
+      packages: write
 
     outputs:
       updated: ${{ steps.compare.outputs.updated }}
