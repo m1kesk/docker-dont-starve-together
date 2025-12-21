@@ -43,7 +43,7 @@ jobs:
           OLD=${{ steps.current.outputs.current_build }}
 
           if [ "$NEW" -gt "$OLD" ]; then
-            echo "$NEW" > build.txt
+            echo -n "$NEW" > build.txt
             echo "updated=true" >> $GITHUB_OUTPUT
           else
             echo "updated=false" >> $GITHUB_OUTPUT
