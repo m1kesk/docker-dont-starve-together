@@ -60,3 +60,4 @@ jobs:
     needs: update
     if: needs.update.outputs.updated == 'true'
     uses: ./.github/workflows/build.yml
+    secrets: inherit
