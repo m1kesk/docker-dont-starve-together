@@ -24,6 +24,7 @@ jobs:
         id: steam
         run: |
           BUILD_ID=$(curl -s https://api.steamcmd.net/v1/info/343050 | jq -r '.data["343050"].depots.branches.public.buildid')
+          echo "build_id=$BUILD_ID"
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
 
       - name: read existing build.txt
