@@ -18,10 +18,10 @@ jobs:
 
     steps:
       - name: checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v4
 
       - name: log in to container registry
-        uses: docker/login-action@v3.6.0
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -48,7 +48,14 @@ jobs:
       - name: create github release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.version }}
         run: |
-          gh release create "${{ steps.version.outputs.version }}" \
-            --title "${{ steps.version.outputs.version }}" \
-            --notes "docker image pushed for build ${{ steps.version.outputs.version }}"
+          # check if the release already exists
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG already exists. skipping creation."
+          else
+            echo "creating new release $TAG."
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes "docker image pushed for build $TAG"
+          fi
