@@ -5,7 +5,7 @@ LABEL maintainer="M1keSK <ing.michal.hudak@gmail.com>"
 
 # set environment variables
 ENV APP_ID=343050
-ENV INSTALL_DIR=/dst
+ENV INSTALL_DIR=/home/steam/dst/game
 
 # install dependencies
 RUN apt-get update
@@ -16,6 +16,12 @@ RUN apt-get clean -y
 # set steam app
 RUN steamcmd +login anonymous +quit
 RUN echo $APP_ID > steam_appid.txt
+
+# create folders
+RUN mkdir -p /home/steam/dst
+RUN mkdir -p /home/steam/dst/save
+RUN mkdir -p /home/steam/dst/mods
+RUN mkdir -p /home/steam/dst/ugc_mods
 
 # install server
 RUN mkdir -p $INSTALL_DIR
