@@ -49,5 +49,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ steps.version.outputs.version }}" \
-            --title "Build ${{ steps.version.outputs.version }}" \
-            --notes "Docker image pushed for build ${{ steps.version.outputs.version }}"
+            --title "${{ steps.version.outputs.version }}" \
+            --notes "docker image pushed for build ${{ steps.version.outputs.version }}"
