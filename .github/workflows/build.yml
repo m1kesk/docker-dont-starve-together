@@ -34,13 +34,20 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: log in to container registry
+      - name: log in to container registry [github]
         if: steps.check_release.outputs.exists == 'false'
         uses: docker/login-action@v3.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: log in to container registry [docker]
+        if: steps.check_release.outputs.exists == 'false'
+        uses: docker/login-action@v3.6.0
+        with:
+          username: ${{ vars.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: build and push docker image
         if: steps.check_release.outputs.exists == 'false'
@@ -51,6 +58,8 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
             ghcr.io/${{ github.repository }}:latest
+            ${{ vars.DOCKER_USER }}/${{ github.repository }}:${{ steps.version.outputs.version }}
+            ${{ vars.DOCKER_USER }}/${{ github.repository }}:latest
 
       - name: create github release
         if: steps.check_release.outputs.exists == 'false'
