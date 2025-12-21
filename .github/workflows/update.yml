@@ -1,0 +1,62 @@
+name: update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    outputs:
+      updated: ${{ steps.compare.outputs.updated }}
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6.0.1
+
+      - name: fetch build id from steam api
+        id: steam
+        run: |
+          BUILD_ID=$(curl -s https://api.steamcmd.net/v1/info/343050 | jq -r '.data["343050"].depots.branches.public.buildid')
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+
+      - name: read existing build.txt
+        id: current
+        run: |
+          if [ -f build.txt ]; then
+            echo "current_build=$(cat build.txt)" >> $GITHUB_OUTPUT
+          else
+            echo "current_build=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: compare and update build.txt
+        id: compare
+        run: |
+          NEW=${{ steps.steam.outputs.build_id }}
+          OLD=${{ steps.current.outputs.current_build }}
+
+          if [ "$NEW" -gt "$OLD" ]; then
+            echo "$NEW" > build.txt
+            echo "updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "updated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: commit updated build.txt
+        if: steps.compare.outputs.updated == 'true'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add build.txt
+          git commit -m "Update build id to ${{ steps.steam.outputs.build_id }}"
+          git push
+
+  build:
+    needs: update
+    if: needs.update.outputs.updated == 'true'
+    uses: ./.github/workflows/build.yml

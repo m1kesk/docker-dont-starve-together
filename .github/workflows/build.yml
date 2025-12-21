@@ -25,10 +25,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: read version from version.txt
+      - name: read version from build.txt
         id: version
         run: |
-          VERSION=$(cat version.txt | tr -d ' \n')
+          VERSION=$(cat build.txt | tr -d ' \n')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: build docker image
