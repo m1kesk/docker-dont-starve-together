@@ -51,8 +51,6 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
             ghcr.io/${{ github.repository }}:latest
-          build-args: |
-            GAME_BUILD=${{ steps.version.outputs.version }}
 
       - name: create github release
         if: steps.check_release.outputs.exists == 'false'
