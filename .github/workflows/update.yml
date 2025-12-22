@@ -23,8 +23,8 @@ jobs:
       - name: fetch build id from steam api
         id: steam
         run: |
-          BUILD_ID=$(curl -s https://api.steamcmd.net/v1/info/343050 | jq -r '.data["343050"].depots.branches.public.buildid')
-          echo "build_id=$BUILD_ID"
+          URL="https://api.steamcmd.net/v1/info/${{ vars.STEAM_APP_ID }}"
+          BUILD_ID=$(curl -s "$URL" | jq -r ".data[\"${{ vars.STEAM_APP_ID }}\"].depots.branches.public.buildid")
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
 
       - name: read existing build.txt
