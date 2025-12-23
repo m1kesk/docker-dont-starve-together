@@ -38,7 +38,7 @@ jobs:
         run: |
           IMAGE=${{ github.repository }}
           ls -la
-          docker build -f dockerfile -t $IMAGE:local .
+          docker build -t $IMAGE:local .
 
       - name: extract game version
         if: steps.check_release.outputs.exists == 'false'
