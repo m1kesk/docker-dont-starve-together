@@ -50,26 +50,35 @@ jobs:
           username: ${{ vars.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: build and push docker image
-        if: steps.check_release.outputs.exists == 'false'
-        uses: docker/build-push-action@v6.18.0
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
-            ghcr.io/${{ github.repository }}:latest
-            docker.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
-            docker.io/${{ github.repository }}:latest
+      - name: build image
+        run: |
+          IMAGE=${{ github.repository }}
+          docker build -f dockerfile -t $IMAGE:local .
 
-      - name: extract internal game version
+      - name: extract game version
         if: steps.check_release.outputs.exists == 'false'
         id: get_version
         run: |
-          # Run the image we just pushed to extract the internal version file
-          IMAGE_NAME="ghcr.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}"
-          GAME_VER=$(docker run --rm $IMAGE_NAME cat /home/steam/dst/game/version.txt | tr -d ' \n')
-          echo "version=$GAME_VER" >> $GITHUB_OUTPUT
+          IMAGE="${{ github.repository }}:local"
+          VERSION=$(docker run --rm $IMAGE cat /home/steam/dst/game/version.txt | tr -d ' \n')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: tag and push image
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          IMAGE=${{ github.repository }}
+          docker tag ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+          docker push ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+          docker tag ghcr.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
+          docker push ghcr.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
+          docker tag ghcr.io/${{ github.repository }}:latest
+          docker push ghcr.io/${{ github.repository }}:latest
+          docker tag docker.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+          docker push docker.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+          docker tag docker.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
+          docker push docker.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
+          docker tag docker.io/${{ github.repository }}:latest
+          docker push docker.io/${{ github.repository }}:latest
 
       - name: create github release
         if: steps.check_release.outputs.exists == 'false'
