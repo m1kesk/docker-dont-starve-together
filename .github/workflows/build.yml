@@ -34,6 +34,19 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: build image
+        run: |
+          IMAGE=${{ github.repository }}
+          docker build -f ./dockerfile -t $IMAGE:local .
+
+      - name: extract game version
+        if: steps.check_release.outputs.exists == 'false'
+        id: get_version
+        run: |
+          IMAGE="${{ github.repository }}:local"
+          VERSION=$(docker run --rm $IMAGE cat /home/steam/dst/game/version.txt | tr -d ' \n')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: log in to container registry [github]
         if: steps.check_release.outputs.exists == 'false'
         uses: docker/login-action@v3.6.0
@@ -49,19 +62,6 @@ jobs:
           registry: docker.io
           username: ${{ vars.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: build image
-        run: |
-          IMAGE=${{ github.repository }}
-          docker build -f dockerfile -t $IMAGE:local .
-
-      - name: extract game version
-        if: steps.check_release.outputs.exists == 'false'
-        id: get_version
-        run: |
-          IMAGE="${{ github.repository }}:local"
-          VERSION=$(docker run --rm $IMAGE cat /home/steam/dst/game/version.txt | tr -d ' \n')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: tag image
         if: steps.check_release.outputs.exists == 'false'
