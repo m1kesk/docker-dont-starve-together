@@ -63,21 +63,26 @@ jobs:
           VERSION=$(docker run --rm $IMAGE cat /home/steam/dst/game/version.txt | tr -d ' \n')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: tag and push image
+      - name: tag image
         if: steps.check_release.outputs.exists == 'false'
         run: |
           IMAGE=${{ github.repository }}
           docker tag ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
-          docker push ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
           docker tag ghcr.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
-          docker push ghcr.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
           docker tag ghcr.io/${{ github.repository }}:latest
-          docker push ghcr.io/${{ github.repository }}:latest
           docker tag docker.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
-          docker push docker.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
           docker tag docker.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
-          docker push docker.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
           docker tag docker.io/${{ github.repository }}:latest
+
+      - name: push image
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          IMAGE=${{ github.repository }}
+          docker push ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+          docker push ghcr.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
+          docker push ghcr.io/${{ github.repository }}:latest
+          docker push docker.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+          docker push docker.io/${{ github.repository }}:${{ steps.get_build.outputs.build_id }}
           docker push docker.io/${{ github.repository }}:latest
 
       - name: create github release
