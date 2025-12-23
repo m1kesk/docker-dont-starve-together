@@ -37,6 +37,7 @@ jobs:
       - name: build image
         run: |
           IMAGE=${{ github.repository }}
+          ls -la
           docker build -f dockerfile -t $IMAGE:local .
 
       - name: extract game version
