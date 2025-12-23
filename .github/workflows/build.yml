@@ -45,7 +45,7 @@ jobs:
         id: get_version
         run: |
           IMAGE="${{ github.repository }}:local"
-          VERSION=$(docker run --rm $IMAGE cat /home/steam/dst/game/version.txt | tr -d ' \n')
+          VERSION=$(docker run --rm --entrypoint sh $IMAGE -c 'cat /home/steam/dst/game/version.txt' | tr -d ' \n')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: log in to container registry [github]
